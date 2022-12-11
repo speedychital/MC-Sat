@@ -1,0 +1,165 @@
+#include<ESP8266Wifi.h>
+#include<WifiClient.h>
+#include<ESP8266WebServer.h>
+#include<ESP8266mDNS.h>
+#include<ESP8266HTTPClient.h>
+#include<TinyGPS++.h>
+#include<SoftwareSerial.h>
+TinyGPSPlus gps;
+SoftwareSerial ss(4,5);
+int dat;
+unsigned long int i,a,b,c,d;
+unsigned long int join(unsigned long int, unsigned long int, unsigned long int, unsigned long int);
+const char* ssid = "iot";
+const char* password = "123456789";
+float latitude, longitude;
+String lat_st;
+char server[] = "www.inplanttrainingchennai.in";
+String buff;
+WifiClient client;
+float temp,dust;
+float vout;
+unsigned long int pressure;
+
+void setup() {
+  Serial.begin(9600);
+  ss.begin(9600);
+  Wifi.mode(WIFI_OFF);
+  delay(1000);
+  Wifi.mode(WIFI_STA);
+  Wifi.begin(ssid,password);
+  Serial.println("'");
+  Serial.print("Connecting");
+  while(WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }  
+}
+
+void loop() {
+  do {
+    dat=Serial.read();
+    delay(100);
+  } while(dat != 'A');
+  
+  Serial.println("AIR VALUE IS: ");
+  for(i=1;i<5;i++) {
+    arr[i] = Serial.read();
+    delay(300);
+  }
+  Serial.write(arr[1]);
+  delay(100);
+  Serial.write(arr[2]);
+  delay(100);
+  Serial.write(arr[3]);
+  delay(100);
+  Serial.write(arr[4]);
+  delay(100);
+  Serial.println("'");
+  Serial.print("AIR DATA UPLOADING TO CLOUD...");
+  a=arr[1]-0x30;
+  b=arr[2]-0x30;
+  c=arr[3]-0x30;
+  d-arr[4]-0x30;
+  vout=join(a,b,c,d);
+  delay(500);
+  
+   do{
+    dat=Serial.read();
+    delay(100);
+  } while(dat!='P');
+  
+  Serial.println("PRESSURE VALUE IS: ");
+  
+  for(i=1;i<5;i++) {
+    arr[i]=Serial.read();
+    delay(300);
+  }
+  
+  Serial.write(arr[1]);
+  delay(100);
+  Serial.write(arr[2]);
+  delay(100);
+  Serial.write(arr[3]);
+  delay(100);
+  Serial.write(arr[4]);
+  delay(100);
+  Serial.println("'");
+  Serial.print("PRESSURE DATA UPLOADING TO CLOUD...");
+  a=arr[1]-0x30;
+  b=arr[2]-0x30;
+  c=arr[3]-0x30;
+  d-arr[4]-0x30;
+  pressure=join(a,b,c,d);
+  delay(500);
+  
+  do{
+    dat=Serial.read();
+    delay(100);
+  } while(dat!='T');
+  
+  Serial.println("TEMPERATURE LEVEL IN CELCIUS: ");
+  
+  for(i=1;i<5;i++) {
+    arr[i]=Serial.read();
+    delay(300);
+  }
+  
+  Serial.write(arr[1]);
+  delay(100);
+  Serial.write(arr[2]);
+  delay(100);
+  Serial.write(arr[3]);
+  delay(100);
+  Serial.write(arr[4]);
+  delay(100);
+  Serial.println("'");
+  Serial.print("TEMPERATURE DATA UPLOADING TO CLOUD...");
+  a=arr[1]-0x30;
+  b=arr[2]-0x30;
+  c=arr[3]-0x30;
+  d-arr[4]-0x30;
+  temp=join(a,b,c,d);
+  delay(500);
+
+  do {
+    dat=Serial.read();
+    delay(100);
+  } while(dat != 'D');
+  
+  Serial.println("DUST VALUE IS: ");
+  
+  for(i=1;i<5;i++) {
+    arr[i] = Serial.read();
+    delay(300);
+  }
+  Serial.write(arr[1]);
+  delay(100);
+  Serial.write(arr[2]);
+  delay(100);
+  Serial.write(arr[3]);
+  delay(100);
+  Serial.write(arr[4]);
+  delay(100);
+  Serial.println("");
+  Serial.print("DUST DATA UPLOADING TO CLOUD...");
+  a=arr[1]-0x30;
+  b=arr[2]-0x30;
+  c=arr[3]-0x30;
+  d=arr[4]-0x30;
+  dust=join(a,b,c,d);
+  delay(500);
+  
+  Sending_To_DB();
+  Serial.end();
+  Serial.begin(9600);
+}
+  
+unsigned long int join(unsigned long int seven, unsigned long int eight, unsigned long int nine, unsigned long int ten) {
+
+  unsigned long int value;
+  value=(seven*1000)+(eight*100)+(nine*10)+(ten*1);
+  return(value);
+}
+  
+  
